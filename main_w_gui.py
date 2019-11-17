@@ -64,11 +64,14 @@ def check_validate_data(x_dots, y_dots, inputed_x):
     except ValueError:
         return True, 'Множество Y должно содержать только числа и не должно быть пустым'
     try:
-        inputed_x = float(inputed_x)
+        if len(inputed_x) == 0:
+            raise ValueError
+        inputed = float(inputed_x)
     except ValueError:
         return True, 'Координата точки по Х должна быть числом'
     if len(x_dots) != len(y_dots):
         return True, 'Количество элементов в множествах X и Y должны совпадать'
+
     return False, 'validated'
 
 
@@ -104,13 +107,13 @@ def calculate_polynomial_from_gui_interface():
 
     error, msg = check_validate_data(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
     # after checking data to validation we can work with it
-    x_dots = list(map(float, x_dots))
-    y_dots = list(map(float, y_dots))
-    inputed_x = float(inputed_x)
-
     if error:
         messagebox.showwarning('Ошибка', msg)
         return False
+    else:
+        x_dots = list(map(float, x_dots))
+        y_dots = list(map(float, y_dots))
+        inputed_x = float(inputed_x)
 
     result = calculate_polynomial(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x, calculating_type=calculating_type)
 
@@ -172,11 +175,6 @@ def calculate_polynomial_from_file():
         y_dots = f.readline().split()
         inputed_x = f.readline()
 
-    check_validate_data(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
-    x_dots = list(map(float, x_dots))
-    y_dots = list(map(float, y_dots))
-    inputed_x = float(inputed_x)
-
     calculating_type = type_of_polynomial.get()  # 0 - uniform nodes, 1 - optimal nodes
     uniform_nodes_type = 0
     optimal_nodes_type = 1
@@ -186,6 +184,10 @@ def calculate_polynomial_from_file():
     if error:
         messagebox.showwarning('Ошибка', msg)
         return False
+
+    x_dots = list(map(float, x_dots))
+    y_dots = list(map(float, y_dots))
+    inputed_x = float(inputed_x)
 
     result = calculate_polynomial(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x, calculating_type=calculating_type)
 
