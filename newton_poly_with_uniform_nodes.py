@@ -38,4 +38,3 @@ def calculate_newton_polynomial_uniform_nodes(x_dots, y_dots, inputed_x):
         polynomial_sum += result_term
 
     return polynomial_sum
-
