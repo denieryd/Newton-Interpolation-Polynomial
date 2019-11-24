@@ -74,7 +74,7 @@ def get_additional_dots(x_dots_uniform, x_dots_optimal, y_dots_uniform, y_dots_o
     new_y_dots_uniform_nodes = []
     new_y_dots_optimal_nodes = []
 
-    new_x_dots = list(np.linspace(-15, 15, 200))
+    new_x_dots = list(np.linspace(-15, 15, 250))
 
     for x_dot in new_x_dots:
         res_uniform = calculate_polynomial(x_dots=x_dots_uniform, y_dots=y_dots_uniform, inputed_x=x_dot,
@@ -216,7 +216,7 @@ def pattern_func(x):
 
 
 def create_draw_ex_tab(x_dots_polynomial=None, y_dots_uniform=None, y_dots_optimal=None):
-    pattern_func_x_dots = np.linspace(-15, 15, 100)
+    pattern_func_x_dots = np.linspace(-10, 13, 200)
     pattern_func_y_dots = []
     for x_dot in pattern_func_x_dots:
         pattern_func_y_dots.append(pattern_func(x_dot))
@@ -224,9 +224,9 @@ def create_draw_ex_tab(x_dots_polynomial=None, y_dots_uniform=None, y_dots_optim
     fig.clear()
     ax = fig.add_subplot(111)
     if y_dots_uniform is not None:
-        ax.plot(x_dots_polynomial, y_dots_uniform, label='uniform')
+        ax.plot(x_dots_polynomial, y_dots_uniform, label='равномерные узлы')
     if y_dots_optimal is not None:
-        ax.plot(x_dots_polynomial, y_dots_optimal, label='optimal')
+        ax.plot(x_dots_polynomial, y_dots_optimal, label='оптимальные узлы')
     ax.plot(pattern_func_x_dots, pattern_func_y_dots, label='12x^3-8x^2-5x+2')
     ax.legend()
     canvas.draw_idle()
@@ -247,18 +247,13 @@ def calculate_polynomial_from_example_tab():
     y_dots_uniform = list(map(float, input_set_y_ex.get().split()))
     inputed_x = float(input_point_x_ex.get())
 
-    step = (b - a) / (count - 1)
     x_dots_optimal = get_x_dots_optimal(a, b, count)
-    print(f'xdotsoptimal', x_dots_optimal)
     y_dots_optimal = get_y_dots_optimal(count)
-    # new_x_dots = create_x_dots(lower_border, high_border, step / 100)
-    # lower_border = float(x_dots[0])
-    # high_border = float(x_dots[-1])
+
     new_x_dots_polynomial, new_y_dots_uniform, new_y_dots_optimal = get_additional_dots(x_dots_uniform=x_dots_uniform,
                                                                                         x_dots_optimal=x_dots_optimal,
                                                                                         y_dots_optimal=y_dots_optimal,
                                                                                         y_dots_uniform=y_dots_uniform)
-
     uniform_nodes = 0
     optimal_nodes = 1
 
@@ -270,10 +265,9 @@ def calculate_polynomial_from_example_tab():
 
     create_draw_ex_tab(new_x_dots_polynomial, new_y_dots_uniform, new_y_dots_optimal)
 
-    messagebox.showinfo('Результат', f'Значение полинома P(x) с оптимальными узлами '
-    f'P({inputed_x}) = {result_with_optimal} '
-    f'С равномерными узлами '
-    f'P({inputed_x}) = {result_with_uniform}')
+    messagebox.showinfo('Результат', f'Оптимальные узлы P({inputed_x}) = {result_with_optimal}\n'
+    f'Равномерные узлы P({inputed_x}) = {result_with_uniform}\n'
+    f'Значение самой функции: {pattern_func(inputed_x)}')
 
 
 btn_calculate_polynomial_ex_tab = Button(example_tab, text="Найти значение полинома",
