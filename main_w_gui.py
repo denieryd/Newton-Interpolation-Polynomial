@@ -4,87 +4,141 @@ from tkinter import ttk
 from tkinter import Text
 from tkinter import filedialog
 
-import matplotlib
-
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
-from newton_poly_with_uniform_nodes import calculate_newton_polynomial_uniform_nodes
-from newton_poly_with_optimal_nodes import calculate_newton_polynomial_optimal_nodes
-
 import numpy as np
+import matplotlib
 
-from tools import get_x_dots_optimal
+from tools import get_x_dots_optimal, get_y_dots_optimal, get_additional_dots, calculate_polynomial
 
 matplotlib.use('TkAgg')
 
-window_width = 1000
-window_height = 600
-root = Tk()
-root.title("Вычисление первого полинома Ньютона")
-root.geometry(f'{window_width}x{window_height}')
 
-tab_control = ttk.Notebook(root)
+class MyApp:
+    def __init__(self, width=1500, height=900):
+        self.window_width = width
+        self.window_height = height
+        self.root = Tk()
+        self.root.title("Вычисление первого полинома Ньютона")
+        self.root.geometry(f'{self.window_width}x{self.window_height}')
 
-example_tab = ttk.Frame(tab_control)
-tab_control.add(example_tab, text='Эталонный пример')
-tab_control.pack(expand=1, fill='both')
+        self.tab_control = ttk.Notebook(self.root)
 
-reading_console_tab = ttk.Frame(tab_control)
-tab_control.add(reading_console_tab, text='Считывание с консоли')
-tab_control.pack(expand=1, fill='both')
+        self.fig = Figure(figsize=(3, 3), dpi=120)
 
-reading_file_tab = ttk.Frame(tab_control)
-tab_control.add(reading_file_tab, text='Считывание с файла')
-tab_control.pack(expand=1, fill='both')
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.root)  # A tk.DrawingArea.
+        self.canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
+
+    def setup_tabs(self):
+        self.reading_console_tab = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.reading_console_tab, text='Считывание с консоли')
+        self.tab_control.pack(expand=1, fill='both')
+
+        self.example_tab = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.example_tab, text='Эталонный пример')
+        self.tab_control.pack(expand=1, fill='both')
+
+        self.reading_file_tab = ttk.Frame(self.tab_control)
+        self.tab_control.add(self.reading_file_tab, text='Считывание с файла')
+        self.tab_control.pack(expand=1, fill='both')
+
+    def setup_example_tab_labels(self):
+        self.header_label = Label(self.example_tab, text="Сравнение оптимальных и равномерных узлов"
+                                                         "\nдля функции 12x^3-8x^2-5x+2",
+                                  font=("Arial Bold", 13, 'bold'))
+        self.header_label.grid(column=0, row=0)
+        self.label_input_iteration = Label(self.example_tab, text="Выберите n", font=("Arial Bold", 11))
+        self.label_input_iteration.grid(column=0, row=1)
+
+        self.label_borders = Label(self.example_tab, text="Введите a и b для оптимальных узлов",
+                                   font=("Arial Bold", 11))
+
+        self.label_borders.grid(column=0, row=2)
+
+        self.label_input_set_x_ex = Label(self.example_tab, text="Введите множество x через пробел",
+                                          font=("Arial Bold", 11))
+        self.label_input_set_x_ex.grid(column=0, row=3)
+
+        self.label_input_set_y_ex = Label(self.example_tab, text="Введите множество y через пробел",
+                                          font=("Arial Bold", 11))
+        self.label_input_set_y_ex.grid(column=0, row=4)
+
+        self.label_input_set_y_ex = Label(self.example_tab, text="Введите точку х, для вычисление P(x)",
+                                          font=("Arial Bold", 11))
+        self.label_input_set_y_ex.grid(column=0, row=5)
+
+    def setup_example_tab(self):
+        self.count_n = StringVar(self.root)
+        self.count_n.set('4')
+        self.count_n_switching_menu = OptionMenu(self.example_tab, self.count_n, "4", "8")
+
+        self.count_n_switching_menu.grid(column=1, row=1)
+
+        self.input_borders = Entry(self.example_tab, width=20)
+        self.input_borders.grid(column=1, row=2, pady=10)
+        self.input_set_x_ex = Entry(self.example_tab, width=20)
+        self.input_set_x_ex.grid(column=1, row=3, pady=10)
+
+        self.input_set_y_ex = Entry(self.example_tab, width=20)
+        self.input_set_y_ex.grid(column=1, row=4, pady=10)
+
+        self.input_point_x_ex = Entry(self.example_tab, width=20)
+        self.input_point_x_ex.grid(column=1, row=5, pady=10)
+
+        self.btn_calculate_polynomial_ex_tab = Button(self.example_tab, text="Найти значение полинома",
+                                                      command=calculate_polynomial_from_example_tab,
+                                                      width=25)
+
+        self.btn_calculate_polynomial_ex_tab.grid(column=2, row=5, padx=15, pady=5)
 
 
 # //////////////
 
 
-def calculate_polynomial(x_dots, y_dots, inputed_x, calculating_type):
-    uniform_nodes_type = 0
-    optimal_nodes_type = 1
+class GUIWorker:
+    def __init__(self):
+        pass
 
-    result = None
-    print(calculating_type, 'calc type')
-    if calculating_type == uniform_nodes_type:
-        print('yes uni')
-        result = calculate_newton_polynomial_uniform_nodes(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
-    elif calculating_type == optimal_nodes_type:
-        print('yes, opti')
-        print(x_dots, y_dots)
-        result = calculate_newton_polynomial_optimal_nodes(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
-    else:
-        print('Ошибка')
+    def create_draw_from_gui(self, x_dots, y_dots, nodes_type, fig, canvas):
+        if nodes_type == 0:
+            lbl = 'Равномерные узлы'
+        else:
+            lbl = 'Оптимальные узлы'
 
-    return result
+        fig.clear()
+        ax = fig.add_subplot(111)
+        ax.plot(x_dots, y_dots, label=lbl)
+        ax.legend()
+        canvas.draw_idle()
 
+    def create_draw_file_tab(self, x_dots, y_dots, nodes_type, fig, canvas):
+        if nodes_type == 0:
+            lbl = 'Равномерные узлы'
+        else:
+            lbl = 'Оптимальные узлы'
 
-def create_x_dots(lower_border, high_border, step):
-    x_dots = [lower_border]
-    while lower_border < high_border:
-        lower_border += step
-        x_dots.append(lower_border)
-    return x_dots
+        fig.clear()
+        ax = fig.add_subplot(111)
+        ax.plot(x_dots, y_dots, label=lbl)
+        ax.legend()
+        canvas.draw_idle()
 
+    def create_draw_ex_tab(self, x_dots_polynomial=None, y_dots_uniform=None, y_dots_optimal=None, fig, canvas):
+        pattern_func_x_dots = np.linspace(-10, 13, 200)
+        pattern_func_y_dots = []
+        for x_dot in pattern_func_x_dots:
+            pattern_func_y_dots.append(pattern_func(x_dot))
 
-def get_additional_dots(x_dots_uniform, x_dots_optimal, y_dots_uniform, y_dots_optimal):
-    new_y_dots_uniform_nodes = []
-    new_y_dots_optimal_nodes = []
-
-    new_x_dots = list(np.linspace(-15, 15, 250))
-
-    for x_dot in new_x_dots:
-        res_uniform = calculate_polynomial(x_dots=x_dots_uniform, y_dots=y_dots_uniform, inputed_x=x_dot,
-                                           calculating_type=0)
-        res_optimal = calculate_polynomial(x_dots=x_dots_optimal, y_dots=y_dots_optimal, inputed_x=x_dot,
-                                           calculating_type=1)
-        new_y_dots_uniform_nodes.append(res_uniform)
-        new_y_dots_optimal_nodes.append(res_optimal)
-
-    return new_x_dots, new_y_dots_uniform_nodes, new_y_dots_optimal_nodes
+        fig.clear()
+        ax = fig.add_subplot(111)
+        if y_dots_uniform is not None:
+            ax.plot(x_dots_polynomial, y_dots_uniform, label='равномерные узлы')
+        if y_dots_optimal is not None:
+            ax.plot(x_dots_polynomial, y_dots_optimal, label='оптимальные узлы')
+        ax.plot(pattern_func_x_dots, pattern_func_y_dots, label='12x^3-8x^2-5x+2')
+        ax.legend()
+        canvas.draw_idle()
 
 
 def calculate_polynomial_from_gui_interface():
@@ -93,146 +147,71 @@ def calculate_polynomial_from_gui_interface():
     :return:
     """
 
-    x_dots = input_set_x.get().split()  # if x_dots is None else x_dots
-    y_dots = input_set_y.get().split()  # if y_dots is None else y_dots
-    inputed_x = input_point_x.get()  # if inputed_x is None else inputed_x
-
-    calculating_type = type_of_polynomial.get()  # 0 - uniform nodes, 1 - optimal nodes
+    calculating_type = type_of_polynomial.get()
     uniform_nodes_type = 0
     optimal_nodes_type = 1
 
-    error, msg = False, 'mock error validate'  # check_validate_data(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
-    # after checking data to validation we can work with it
-    if error:
-        messagebox.showwarning('Ошибка', msg)
-        return False
-    else:
-
-        if calculating_type == optimal_nodes_type:
-            x0 = float(x_dots[0])
-            xn = float(x_dots[1])
-            step = float(x_dots[2])
-            count = int((xn - x0) / step + 1)
-            print(f'count is {count}')
-            x_dots_optimal = get_x_dots_optimal(x0, xn, count)
-            x_dots_uniform = create_x_dots(x0, xn, step)
-            print(x_dots_optimal, 'dots optimal')
-            print('x_dots_uni, opti len', len(x_dots_uniform), len(x_dots_uniform))
-        elif calculating_type == uniform_nodes_type:
-            pass
-        # x_dots = list(map(float, x_dots))
-        y_dots = list(map(float, y_dots))
-        inputed_x = float(inputed_x)
-
-        # new_x_dots = create_x_dots(lower_border, high_border, step / 100)
-        lower_border = float(x_dots[0])
-        high_border = float(x_dots[-1])
-        new_x_dots = np.linspace(lower_border, high_border, 100)
-        # new_y_dots_uniform, new_y_dots_optimal = get_additional_dots(x_dots, y_dots, new_x_dots)
-
-    result = calculate_polynomial(x_dots=x_dots_optimal, y_dots=y_dots, inputed_x=inputed_x,
-                                  calculating_type=1)  # switch 1 to variable
-    print('result is:', result)
-    # create_draw_2(new_x_dots, new_y_dots_uniform, new_y_dots_optimal)
-
+    print('POLY TYPE', calculating_type)
     if calculating_type == uniform_nodes_type:
-        messagebox.showinfo('Результат', f'Значение полинома P(x) с равномерными узлами '
-        f'P({inputed_x}) = {result}')
+        x_dots_uniform = list(map(float, input_set_x.get().split()))
+        y_dots_uniform = list(map(float, input_set_y.get().split()))
+        inputed_x = float(input_point_x.get())
+
+        new_x_dots = list(np.linspace(x_dots_uniform[0], x_dots_uniform[-1], 100))
+        new_y_dots = []
+        for x_dot in new_x_dots:
+            res = calculate_polynomial(x_dots=x_dots_uniform, y_dots=y_dots_uniform, inputed_x=x_dot,
+                                       calculating_type=0)
+            new_y_dots.append(res)
+
+        result = calculate_polynomial(x_dots=x_dots_uniform, y_dots=y_dots_uniform, inputed_x=inputed_x,
+                                      calculating_type=0)
+        create_draw_from_gui(new_x_dots, new_y_dots, 0)
+
+        if calculating_type == uniform_nodes_type:
+            messagebox.showinfo('Результат', f'Значение полинома P(x) с равномерными узлами '
+            f'P({inputed_x}) = {result}')
+        elif calculating_type == optimal_nodes_type:
+            messagebox.showinfo('Результат', f'Значение полинома P(x) с оптимальными узлами '
+            f'P({inputed_x}) = {result}')
+        else:
+            print('Ошибка')
+
     elif calculating_type == optimal_nodes_type:
-        messagebox.showinfo('Результат', f'Значение полинома P(x) с оптимальными узлами '
-        f'P({inputed_x}) = {result}')
-    else:
-        print('Ошибка')
+        a, b, count = input_set_x.get().split()
+        a, b, count = float(a), float(b), int(count)
+        y_dots_optimal = get_y_dots_optimal(4)  # list(map(float, input_set_y.get().split()))
+        inputed_x = float(input_point_x.get())
+
+        x_dots_optimal = get_x_dots_optimal(a, b, count)
+
+        new_x_dots = list(np.linspace(x_dots_optimal[0], x_dots_optimal[-1], 100))
+        new_y_dots = []
+        for x_dot in new_x_dots:
+            res = calculate_polynomial(x_dots=x_dots_optimal, y_dots=y_dots_optimal, inputed_x=x_dot,
+                                       calculating_type=1)
+            new_y_dots.append(res)
+
+        result = calculate_polynomial(x_dots=x_dots_optimal, y_dots=y_dots_optimal, inputed_x=inputed_x,
+                                      calculating_type=1)  # switch 1 to variable
+
+        create_draw_from_gui(new_x_dots, new_y_dots, 1)
+
+        if calculating_type == uniform_nodes_type:
+            messagebox.showinfo('Результат', f'Значение полинома P(x) с равномерными узлами '
+            f'P({inputed_x}) = {result}')
+        elif calculating_type == optimal_nodes_type:
+            messagebox.showinfo('Результат', f'Значение полинома P(x) с оптимальными узлами '
+            f'P({inputed_x}) = {result}')
+        else:
+            print('Ошибка')
 
 
 # /////
 
 
-header_label = Label(example_tab, text="Сравнение оптимальных и равномерных узлов"
-                                       "\nдля функции 12x^3-8x^2-5x+2", font=("Arial Bold", 13, 'bold'))
-header_label.grid(column=0, row=0)
-
-label_input_iteration = Label(example_tab, text="Выберите n", font=("Arial Bold", 11))
-count_n = StringVar(root)
-count_n.set('4')
-count_n_switching_menu = OptionMenu(example_tab, count_n, "4", "8")
-label_input_iteration.grid(column=0, row=1)
-count_n_switching_menu.grid(column=1, row=1)
-
-label_borders = Label(example_tab, text="Введите a и b для оптимальных узлов", font=("Arial Bold", 11))
-input_borders = Entry(example_tab, width=20)
-label_borders.grid(column=0, row=2)
-input_borders.grid(column=1, row=2, pady=10)
-
-label_input_set_x_ex = Label(example_tab, text="Введите множество x через пробел", font=("Arial Bold", 11))
-input_set_x_ex = Entry(example_tab, width=20)
-label_input_set_x_ex.grid(column=0, row=3)
-input_set_x_ex.grid(column=1, row=3, pady=10)
-
-label_input_set_y_ex = Label(example_tab, text="Введите множество y через пробел", font=("Arial Bold", 11))
-input_set_y_ex = Entry(example_tab, width=20)
-input_set_y_ex.grid(column=1, row=4, pady=10)
-label_input_set_y_ex.grid(column=0, row=4)
-
-label_input_set_y_ex = Label(example_tab, text="Введите точку х, для вычисление P(x)", font=("Arial Bold", 11))
-input_point_x_ex = Entry(example_tab, width=20)
-label_input_set_y_ex.grid(column=0, row=5)
-input_point_x_ex.grid(column=1, row=5, pady=10)
-
-
-def get_y_dots_optimal(count):
-    if count == 4:
-        return [-1381.4614750443766,
-                -179.44171639342537,
-                16.99999999999998,
-                1556.3671878257146]
-    elif count == 8:
-        return [1.3008848966265942,
-                2.5389166448734786,
-                1.272654113572865,
-                -1.3347452240844833,
-                6.6875,
-                41.21983426316527,
-                105.73833675454303,
-                180.80483335512648, ]
-
-
-def setup():
-    input_borders.insert(0, '-5 8')
-    input_set_x_ex.insert(0, '-5 -2 2 8')
-    input_set_y_ex.insert(0, '-1673 -116 56 5594')
-
-
-setup()
-
-fig = Figure(figsize=(3, 3), dpi=120)
-
-canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
-canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
-
-
 def pattern_func(x):
     return 12 * (x ** 3) - 8 * (x ** 2) - 5 * x + 2
-
-
-def create_draw_ex_tab(x_dots_polynomial=None, y_dots_uniform=None, y_dots_optimal=None):
-    pattern_func_x_dots = np.linspace(-10, 13, 200)
-    pattern_func_y_dots = []
-    for x_dot in pattern_func_x_dots:
-        pattern_func_y_dots.append(pattern_func(x_dot))
-
-    fig.clear()
-    ax = fig.add_subplot(111)
-    if y_dots_uniform is not None:
-        ax.plot(x_dots_polynomial, y_dots_uniform, label='равномерные узлы')
-    if y_dots_optimal is not None:
-        ax.plot(x_dots_polynomial, y_dots_optimal, label='оптимальные узлы')
-    ax.plot(pattern_func_x_dots, pattern_func_y_dots, label='12x^3-8x^2-5x+2')
-    ax.legend()
-    canvas.draw_idle()
-
-
-create_draw_ex_tab()
 
 
 def calculate_polynomial_from_example_tab():
@@ -269,12 +248,6 @@ def calculate_polynomial_from_example_tab():
     f'Равномерные узлы P({inputed_x}) = {result_with_uniform}\n'
     f'Значение самой функции: {pattern_func(inputed_x)}')
 
-
-btn_calculate_polynomial_ex_tab = Button(example_tab, text="Найти значение полинома",
-                                         command=calculate_polynomial_from_example_tab,
-                                         width=25)
-
-btn_calculate_polynomial_ex_tab.grid(column=2, row=5, padx=15, pady=5)
 
 # ///////
 
@@ -366,17 +339,20 @@ def calculate_polynomial_from_file():
     uniform_nodes_type = 0
     optimal_nodes_type = 1
 
-    # error, msg = check_validate_data(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x)
-
-    # if error:
-    #    messagebox.showwarning('Ошибка', msg)
-    #    return False
-
     x_dots = list(map(float, x_dots))
     y_dots = list(map(float, y_dots))
     inputed_x = float(inputed_x)
 
     result = calculate_polynomial(x_dots=x_dots, y_dots=y_dots, inputed_x=inputed_x, calculating_type=calculating_type)
+
+    new_x_dots = list(np.linspace(x_dots[0], x_dots[-1], 100))
+    new_y_dots = []
+    for x_dot in new_x_dots:
+        res = calculate_polynomial(x_dots=x_dots, y_dots=y_dots, inputed_x=x_dot,
+                                   calculating_type=calculating_type)
+        new_y_dots.append(res)
+
+    create_draw_file_tab(new_x_dots, new_y_dots, calculating_type)
 
     if calculating_type == uniform_nodes_type:
         messagebox.showinfo('Результат', f'Значение полинома P(x) с равномерными узлами '
@@ -397,4 +373,12 @@ btn_add_member = Button(reading_file_tab, text="Найти значение по
 btn_add_member.grid(column=0, row=4, pady=10)
 
 if __name__ == '__main__':
+    def setup():
+        input_borders.insert(0, '-5 8')
+        input_set_x_ex.insert(0, '-5 -2 2 8')
+        input_set_y_ex.insert(0, '-1673 -116 56 5594')
+
+
+    setup()
+
     root.mainloop()
