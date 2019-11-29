@@ -4,7 +4,7 @@ from tkinter import ttk
 from tkinter import Text
 from tkinter import filedialog
 
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
 import numpy as np
@@ -84,6 +84,7 @@ input_point_x_ex.grid(column=1, row=5, pady=10)
 fig = Figure(figsize=(3, 3), dpi=120)
 
 canvas = FigureCanvasTkAgg(fig, master=root)  # A tk.DrawingArea.
+toolbar = NavigationToolbar2Tk(canvas, root)
 canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=1)
 
 
