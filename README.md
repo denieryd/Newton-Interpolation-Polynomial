@@ -1,6 +1,6 @@
 # Newton_polynomial
 
-This harmful project should have had next structure, but refactoring this code wasn't pleasure
+This harmful project should have had next structure, but refactoring this code wasn't possible
 
 ![alt text](https://github.com/Nwke/Newton-Interpolation-Polynomial/blob/master/future_past_project_structure_scr3.png)
 
