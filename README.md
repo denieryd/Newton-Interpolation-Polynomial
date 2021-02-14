@@ -1,5 +1,14 @@
 # Application for polynomial approximation using nodes
 
+## Setup
+Clone the project
+```bash
+ pip install -r requirements.txt
+```
+```bash
+python main.py
+```
+
 To be honest, I'm writing this readme after 15 months when the project was written;
 The project is a part of a course work from the university I study in 
 
@@ -7,21 +16,22 @@ This is the ui-based application that uses computational mathematics' methods fo
 approximation
 
 The main goal of the app is next: you have set of (x, y) nodes, but you don't know
-The function and the application is trying to approximate function and to calculate approximated function 
+the function and the application is trying to approximate function and to calculate approximated function 
 at specified x  
 
 When the app is started, you see three tabs
 
-First tab is for manually input data: you manually input set of (x, y) nodes
-and next the x you wanna to;
+First tab is for manual data input: you manually input set of (x, y) nodes 
+and the x you wanna calculate at;
 
-There are two options for nodes - optimal (Chebyshev's ) and uniform distribution for nodes </br>
-Choose any and input data, click the button and you'll see the result on the graph
-The app will paint the approximated function 
+There are two options for nodes - optimal (Chebyshev's ) and uniform distribution </br>
+Choose any and input data, click the button and you'll see the result
+The app will also paint the approximated function 
 
 ![alt text](./images/app_example1.png)
 
-Second tab demonstrates comparing between optimal and uniform nodes using already specified function
+Second tab demonstrates comparing the result between optimal and uniform nodes using 
+already specified function
 
 ![alt text](./images/app_example2.png)
 The third tab demonstrates a possibility to input data via a file
