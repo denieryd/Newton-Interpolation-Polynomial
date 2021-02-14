@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Application for polynomial approximation using nodes
 
 To be honest, I'm writing this readme after 15 months when the project was written;
@@ -40,3 +41,14 @@ This project should have had the next structure, but refactoring didn't happen
 ![alt text](./images/future_past_project_structure_scr2.png)
 
 ![alt text](./images/future_past_project_structure_scr3.png)
+=======
+# Newton_polynomial
+
+This harmful project should have had next structure, but refactoring this code wasn't possible
+
+![alt text](https://github.com/Nwke/Newton-Interpolation-Polynomial/blob/master/future_past_project_structure_scr3.png)
+
+![alt text](https://github.com/Nwke/Newton-Interpolation-Polynomial/blob/master/future_past_project_structure_scr1.png)
+
+![alt text](https://github.com/Nwke/Newton-Interpolation-Polynomial/blob/master/future_past_project_structure_scr2.png)
+>>>>>>> 5a55ef66b279a68dd2145a078146501617883da9
